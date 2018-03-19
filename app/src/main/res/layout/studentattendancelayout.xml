@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/attendancelayoutrollno"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:gravity="center"
+        android:textSize="150sp"
+        tools:text="21" />
+
+    <TextView
+        android:id="@+id/attendancelayoutstudentname"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textSize="40sp"
+        tools:text="Sagar Salekar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <Button
+            android:id="@+id/attendancepresentbutton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_weight="1"
+            android:background="#4CAF50"
+            android:focusable="true"
+            android:text="Present"
+            android:textColor="#fff" />
+
+        <Button
+            android:id="@+id/attendanceabsentbutton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_weight="1"
+            android:background="#D84315"
+            android:focusable="true"
+            android:text="Absent"
+            android:textColor="#fff" />
+
+    </LinearLayout>
+
+</LinearLayout>
