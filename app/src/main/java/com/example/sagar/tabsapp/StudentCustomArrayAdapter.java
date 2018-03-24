@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -72,17 +73,18 @@ public class StudentCustomArrayAdapter extends ArrayAdapter<StudentListItem> {
         // set this text on the number TextView
         rollnoTextView.setText(String.valueOf(currentStudent.getrollno()));
 
-
-        if (displaypresentyview == 1) {
-            listItemView.findViewById(R.id.presentycheckbox).setVisibility(View.VISIBLE);
-        }
-
         if (displaystatistics == 1) {
-            TextView studavgview = listItemView.findViewById(R.id.studentattendanceview);
-            studavgview.setVisibility(View.VISIBLE);
-            int studaverage = (int) calculatestudentpresenty(classid, currentStudent.getid());
-            if (studaverage > 0) {
-                studavgview.setText(String.valueOf(studaverage) + "%");
+            RelativeLayout studavglayout = listItemView.findViewById(R.id.studentattendanceview);
+            studavglayout.setVisibility(View.VISIBLE);
+            TextView studavgpview = listItemView.findViewById(R.id.studentattendancepercentageview);
+            TextView studavgnview = listItemView.findViewById(R.id.studentattendancenumberview);
+            presentyholder studaverage = calculatestudentpresenty(classid, currentStudent.getid());
+            if (studaverage.totalcount > 0) {
+                studavgpview.setText(String.valueOf((studaverage.presentycount * 100) / studaverage.totalcount) + "%");
+                studavgnview.setText(String.valueOf(studaverage.presentycount) + "/" + String.valueOf(studaverage.totalcount));
+            } else {
+                studavgpview.setText("0%");
+                studavgnview.setText("0/0");
             }
         }
 
@@ -91,10 +93,9 @@ public class StudentCustomArrayAdapter extends ArrayAdapter<StudentListItem> {
         return listItemView;
     }
 
-    public float calculatestudentpresenty(long classid, long studid) {
+    public presentyholder calculatestudentpresenty(long classid, long studid) {
         DBHandler db = new DBHandler(getContext(), null, null, 1);
-        int totalcount = 0;
-        int presentycount = 0;
+        presentyholder p = new presentyholder();
         String query = "SELECT * FROM dbattendancerecord WHERE dbclassid =" + classid + " AND dbstudid =" + studid;
         SQLiteDatabase sqlitedb = db.getReadableDatabase();
         Cursor cursor = sqlitedb.rawQuery(query, null);
@@ -102,16 +103,20 @@ public class StudentCustomArrayAdapter extends ArrayAdapter<StudentListItem> {
 
             do {
                 if (cursor.getInt(cursor.getColumnIndex("dbattendance")) == 1) {
-                    presentycount++;
+                    p.presentycount++;
                 }
-                totalcount++;
+                p.totalcount++;
 
             } while (cursor.moveToNext());
         } else {
-            return 0;
+            return p;
 
         }
-        return ((presentycount * 100) / totalcount);
+        return p;
     }
 
+
+    private class presentyholder {
+        int presentycount = 0, totalcount = 0;
+    }
 }

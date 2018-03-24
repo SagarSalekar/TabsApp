@@ -68,9 +68,12 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
 
     @Override
     public void createstudent(String studentname, int rollno) {
-        long id = db.addNewStudentdb(studentname, rollno, classid);
-
-        addNewStudent(studentname, rollno, id);
+        if (!checkalreadyexist(rollno)) {
+            long id = db.addNewStudentdb(studentname, rollno, classid);
+            addNewStudent(studentname, rollno, id);
+        } else {
+            Toast.makeText(this, "Student with same roll no already exist!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void addNewStudent(String studentname, int rollno, long id) {
@@ -85,7 +88,7 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
         String studname;
         int rollno;
         long id;
-        String query = "SELECT * FROM dbstudents";
+        String query = "SELECT * FROM dbstudents WHERE dbclassid=" + classid;
         SQLiteDatabase sqlitedb = db.getReadableDatabase();
         Cursor cursor = sqlitedb.rawQuery(query, null);
         if (cursor.moveToFirst()) {
@@ -153,6 +156,17 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
         db.deleteStudentdb(clickedItem);
         displayStudentsData();
         Toast.makeText(this, clickedItem.getstudentsnm() + " student deleted successfully! ", Toast.LENGTH_SHORT).show();
+    }
+
+    public boolean checkalreadyexist(int rollno) {
+        String query = "SELECT * FROM dbstudents WHERE dbclassid=" + classid + " AND dbrollno=" + rollno;
+        SQLiteDatabase sqlitedb = db.getReadableDatabase();
+        Cursor cursor = sqlitedb.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            return true;
+
+        }
+        return false;
     }
 
 

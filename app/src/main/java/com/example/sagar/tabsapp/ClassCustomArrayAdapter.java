@@ -60,7 +60,7 @@ public class ClassCustomArrayAdapter extends ArrayAdapter<ClassListItem> {
             TextView classavgview = listItemView.findViewById(R.id.classpercentage);
             classavgview.setVisibility(View.VISIBLE);
             int classaverage = (int) calculateclasspresenty(currentClass.getid());
-            if (classaverage > 0) {
+            if (classaverage >= 0) {
                 classavgview.setText(String.valueOf(classaverage) + "%");
             }
         }

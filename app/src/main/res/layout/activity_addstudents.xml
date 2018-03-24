@@ -17,10 +17,9 @@
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
             android:padding="15dp"
-            android:text=""
+            android:text="Roll No.              Student Name"
             android:textColor="#fff"
-            android:textSize="15sp"
-            tools:text="Add Students to this class" />
+            android:textSize="15sp" />
 
         <RelativeLayout
             android:id="@+id/classlistlayout"

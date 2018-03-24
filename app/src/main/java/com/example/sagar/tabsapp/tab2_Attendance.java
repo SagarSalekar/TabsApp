@@ -73,6 +73,7 @@ public class tab2_Attendance extends Fragment {
                 Intent tab2intent = new Intent(getContext(), markattendance.class);
                 ClassListItem clickeditem = item.get(i);
                 tab2intent.putExtra("classid", clickeditem.getid());
+                tab2intent.putExtra("classname", clickeditem.getclassnm() + " : " + clickeditem.getsubnm());
                 startActivity(tab2intent);
             }
         });

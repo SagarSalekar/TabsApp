@@ -2,6 +2,7 @@ package com.example.sagar.tabsapp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -19,13 +20,16 @@ public class DBHandler extends SQLiteOpenHelper {
     public static final String COLUMN_CLASSID = "dbclassid";
     public static final String COLUMN_CLASSNAME = "dbclassname";
     public static final String COLUMN_SUBNAME = "dbsubname";
+
     public static final String TABLE_STUDENT = "dbstudents";
     public static final String COLUMN_STUDID = "dbstudid";
     public static final String COLUMN_STUDNAME = "dbstudname";
     public static final String COLUMN_ROLLNO = "dbrollno";
+
     public static final String TABLE_ATTENDANCE = "dbattendancerecord";
     public static final String COLUMN_DATE = "dbattendancedate";
     public static final String COLUMN_PRESENTY = "dbattendance";
+
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "attendance.db";
 
@@ -51,7 +55,7 @@ public class DBHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(createstudentsquery);
 
         String createattendancerecordquery = "CREATE TABLE " + TABLE_ATTENDANCE + "( " +
-                COLUMN_DATE + " DATETIME, " +
+                COLUMN_DATE + " DATE, " +
                 COLUMN_PRESENTY + " FLAG INTEGER DEFAULT 0, " +
                 COLUMN_STUDID + " INTEGER, " +
                 COLUMN_CLASSID + " INTEGER, " +
@@ -100,34 +104,59 @@ public class DBHandler extends SQLiteOpenHelper {
     public void deleteStudentdb(StudentListItem item) {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_STUDENT + " WHERE " + COLUMN_STUDID + "=" + item.getid());
+        db.execSQL("DELETE FROM " + TABLE_ATTENDANCE + " WHERE " + COLUMN_STUDID + "=" + item.getid());
+
     }
 
-    public void markpresent(long studentid, long classid) {
+    public void markpresent(long studentid, long classid, boolean update) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_CLASSID, classid);
         values.put(COLUMN_STUDID, studentid);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String strDate = sdf.format(new Date());
-        values.put(COLUMN_DATE, strDate);
-        values.put(COLUMN_PRESENTY, 1);
+        Log.d("Date", strDate);
         SQLiteDatabase db = getWritableDatabase();
-        db.insert(TABLE_ATTENDANCE, null, values);
+        //checking if already marked attendance
+        if (checkifattendancemarked(studentid, classid, strDate) || update) {
+            db.execSQL("UPDATE " + TABLE_ATTENDANCE + " SET " + COLUMN_PRESENTY + " = 1 WHERE dbclassid = " + classid + " AND dbstudid = " + studentid + " AND dbattendancedate = '" + strDate + "'");
+            Log.d("Presenty Updated!", "Attendance record updated successfully");
+        } else {
+            values.put(COLUMN_DATE, strDate);
+            values.put(COLUMN_PRESENTY, 1);
+            db.insert(TABLE_ATTENDANCE, null, values);
+            Log.d("Marked Present! ", "Attendance record updated successfully");
+        }
         db.close();
-        Log.d("Marked Present! ", "Attendance record updated successfully");
     }
 
-    public void markabsent(long studentid, long classid) {
+    public void markabsent(long studentid, long classid, boolean update) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_CLASSID, classid);
         values.put(COLUMN_STUDID, studentid);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String strDate = sdf.format(new Date());
-        values.put(COLUMN_DATE, strDate);
-        values.put(COLUMN_PRESENTY, 0);
         SQLiteDatabase db = getWritableDatabase();
-        db.insert(TABLE_ATTENDANCE, null, values);
+        if (checkifattendancemarked(studentid, classid, strDate) || update) {
+            db.execSQL("UPDATE " + TABLE_ATTENDANCE + " SET " + COLUMN_PRESENTY + " = 0 WHERE dbclassid = " + classid + " AND dbstudid = " + studentid + " AND dbattendancedate = '" + strDate + "'");
+            Log.d("Absenty Updated!", "Attendance record updated successfully");
+        } else {
+            values.put(COLUMN_DATE, strDate);
+            values.put(COLUMN_PRESENTY, 0);
+            db.insert(TABLE_ATTENDANCE, null, values);
+            Log.d("Marked Absent! ", "Attendance record updated successfully");
+        }
         db.close();
-        Log.d("Marked Absent! ", "Attendance record updated successfully");
+    }
+
+    public boolean checkifattendancemarked(long studentid, long classid, String strDate) {
+        String query = "SELECT * FROM dbattendancerecord WHERE dbclassid = " + classid + " AND dbstudid = " + studentid + " AND dbattendancedate = '" + strDate + "'";
+        SQLiteDatabase sqlitedb = getReadableDatabase();
+        Cursor cursor = sqlitedb.rawQuery(query, null);
+        Log.d("cursor", String.valueOf(cursor.getCount()));
+        if (cursor.getCount() != 0) {
+            return true;
+        }
+        return false;
     }
 
 }

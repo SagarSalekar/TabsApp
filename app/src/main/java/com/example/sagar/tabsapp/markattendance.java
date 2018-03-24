@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +15,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class markattendance extends AppCompatActivity {
     private DBHandler db;
     private long classid;
+    private String classnm;
+    private Boolean update = new Boolean(false);
 
     private ListView list;
     private thisstudentattendanceadapter adapter;
@@ -29,12 +34,30 @@ public class markattendance extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        --pass current date and time to store in dbattendance date to sort new and update problem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_markattendance);
         Intent i = getIntent();
         classid = i.getLongExtra("classid", 0);
+        classnm = i.getStringExtra("classname");
         Toast.makeText(this, String.valueOf(classid), Toast.LENGTH_SHORT).show();
         db = new DBHandler(this, null, null, 1);
+        TextView classlabel = findViewById(R.id.classlabel);
+        TextView datelabel = findViewById(R.id.datelabel);
+        classlabel.setText(classnm);
+        datelabel.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
+        findViewById(R.id.newradiobtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                update = false;
+            }
+        });
+        findViewById(R.id.updateradiobtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                update = true;
+            }
+        });
         int studentcount = getStudentsData();
     }
 
@@ -44,7 +67,7 @@ public class markattendance extends AppCompatActivity {
         String studname;
         int rollno;
         long id;
-        String query = "SELECT * FROM dbstudents";
+        String query = "SELECT * FROM dbstudents WHERE dbclassid=" + classid;
         SQLiteDatabase sqlitedb = db.getReadableDatabase();
         Cursor cursor = sqlitedb.rawQuery(query, null);
         if (cursor.moveToFirst()) {
@@ -126,17 +149,13 @@ public class markattendance extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Toast.makeText(getContext(), "Present " + studentitem.get(position).getstudentsnm(), Toast.LENGTH_SHORT).show();
-                    db.markpresent(studentitem.get(position).getid(), classid);
-//                    list.getChildAt(position).
-
-                    list.smoothScrollToPosition(position);
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            adapter.remove(studentitem.get(position));
-                        }
-                    }, 10000);
+                    if (update = false) {
+                        db.markpresent(studentitem.get(position).getid(), classid, update);
+                    } else {
+                        db.markpresent(studentitem.get(position).getid(), classid, update);
+                    }
+                    list.getChildAt(position).setBackgroundColor(Color.parseColor("#C8E6C9"));
+                    list.smoothScrollToPosition(position + 1);
                 }
             });
 
@@ -144,9 +163,13 @@ public class markattendance extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Toast.makeText(getContext(), "Absent " + studentitem.get(position).getstudentsnm(), Toast.LENGTH_SHORT).show();
-                    db.markabsent(studentitem.get(position).getid(), classid);
-                    adapter.remove(studentitem.get(position));
-                    list.smoothScrollToPosition(position);
+                    if (update = false) {
+                        db.markabsent(studentitem.get(position).getid(), classid, update);
+                    } else {
+                        db.markabsent(studentitem.get(position).getid(), classid, update);
+                    }
+                    list.getChildAt(position).setBackgroundColor(Color.parseColor("#FFCCBC"));
+                    list.smoothScrollToPosition(position + 1);
                 }
             });
 

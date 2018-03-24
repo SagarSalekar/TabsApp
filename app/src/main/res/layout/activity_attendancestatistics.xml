@@ -22,10 +22,9 @@
                 android:layout_weight="1"
                 android:background="@color/colorPrimary"
                 android:padding="15dp"
-                android:text=""
+                android:text="Roll No.                  Student Name            Percentage"
                 android:textColor="#fff"
-                android:textSize="15sp"
-                tools:text="TE B SE" />
+                android:textSize="15sp" />
 
         </LinearLayout>
 

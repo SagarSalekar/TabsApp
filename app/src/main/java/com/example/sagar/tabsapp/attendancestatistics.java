@@ -35,7 +35,7 @@ public class attendancestatistics extends AppCompatActivity {
         String studname;
         int rollno;
         long id;
-        String query = "SELECT * FROM dbstudents";
+        String query = "SELECT * FROM dbstudents WHERE dbclassid=" + classid;
         SQLiteDatabase sqlitedb = db.getReadableDatabase();
         Cursor cursor = sqlitedb.rawQuery(query, null);
         if (cursor.moveToFirst()) {
