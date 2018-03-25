@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -34,7 +33,8 @@ public class markattendance extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        --pass current date and time to store in dbattendance date to sort new and update problem
+//        --pass current date and time to store in dbattendance date to sort new and update problem
+//        -- ask if new or update if new increase presenty flag of same date by 1 or decrease by 1
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_markattendance);
         Intent i = getIntent();
@@ -154,7 +154,7 @@ public class markattendance extends AppCompatActivity {
                     } else {
                         db.markpresent(studentitem.get(position).getid(), classid, update);
                     }
-                    list.getChildAt(position).setBackgroundColor(Color.parseColor("#C8E6C9"));
+//                    list.getChildAt(position).setBackgroundColor(Color.parseColor("#C8E6C9"));
                     list.smoothScrollToPosition(position + 1);
                 }
             });
@@ -168,7 +168,7 @@ public class markattendance extends AppCompatActivity {
                     } else {
                         db.markabsent(studentitem.get(position).getid(), classid, update);
                     }
-                    list.getChildAt(position).setBackgroundColor(Color.parseColor("#FFCCBC"));
+//                    list.getChildAt(position).setBackgroundColor(Color.parseColor("#FFCCBC"));
                     list.smoothScrollToPosition(position + 1);
                 }
             });

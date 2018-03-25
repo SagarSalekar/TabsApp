@@ -57,6 +57,15 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.importstudents:
+                Intent importStudentsIntent = new Intent(this, importStudentsActivity.class);
+                importStudentsIntent.putExtra("classid", classid);
+                this.finish();
+
+                //free up space for efficient memory usage
+                freeupmemoryclass f = new freeupmemoryclass();
+                f.freeMemory();
+
+                startActivity(importStudentsIntent);
                 Toast.makeText(this, "importstudents", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.deletestudents:

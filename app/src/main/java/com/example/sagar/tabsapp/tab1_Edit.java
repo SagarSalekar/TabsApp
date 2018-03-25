@@ -93,6 +93,11 @@ public class tab1_Edit extends Fragment {
                 ClassListItem tempitem = item.get(i);
                 Intent tab1intent = new Intent(getContext(), AddStudentsActivity.class);
                 tab1intent.putExtra("classid", tempitem.getid());
+
+                //free up space for efficient memory usage
+                freeupmemoryclass f = new freeupmemoryclass();
+                f.freeMemory();
+
                 startActivity(tab1intent);
             }
         });
@@ -143,4 +148,6 @@ public class tab1_Edit extends Fragment {
                 })
                 .show();
     }
+
+
 }

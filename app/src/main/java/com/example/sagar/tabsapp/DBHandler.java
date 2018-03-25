@@ -87,6 +87,8 @@ public class DBHandler extends SQLiteOpenHelper {
     public void deleteClassdb(ClassListItem item) {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_CLASS + " WHERE " + COLUMN_CLASSID + "=" + item.getid());
+        db.execSQL("DELETE FROM " + TABLE_STUDENT + " WHERE " + COLUMN_CLASSID + "=" + item.getid());
+        db.execSQL("DELETE FROM " + TABLE_ATTENDANCE + " WHERE " + COLUMN_CLASSID + "=" + item.getid());
     }
 
     public long addNewStudentdb(String studentname, int rollno, long classid) {

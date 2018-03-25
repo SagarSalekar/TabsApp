@@ -89,7 +89,6 @@
                 android:layout_margin="8dp"
                 android:focusable="false"
                 android:horizontalSpacing="8dp"
-                android:numColumns="3"
                 android:verticalSpacing="8dp">
 
             </ListView>

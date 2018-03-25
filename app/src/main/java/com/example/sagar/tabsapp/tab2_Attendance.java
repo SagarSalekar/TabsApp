@@ -74,6 +74,11 @@ public class tab2_Attendance extends Fragment {
                 ClassListItem clickeditem = item.get(i);
                 tab2intent.putExtra("classid", clickeditem.getid());
                 tab2intent.putExtra("classname", clickeditem.getclassnm() + " : " + clickeditem.getsubnm());
+
+                //free up space for efficient memory usage
+                freeupmemoryclass f = new freeupmemoryclass();
+                f.freeMemory();
+
                 startActivity(tab2intent);
             }
         });
