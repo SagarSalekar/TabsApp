@@ -18,6 +18,8 @@ import android.widget.EditText;
 public class AddClassDialog extends AppCompatDialogFragment {
     private EditText classname;
     private EditText subname;
+    private boolean update;
+    private long classID;
     private View v1;
     private AddClass addc;
 
@@ -27,6 +29,8 @@ public class AddClassDialog extends AppCompatDialogFragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         v1 = inflater.inflate(R.layout.add_class_dialog, null);
+        update = getArguments().getBoolean("update");
+
         builder.setView(v1)
                 .setTitle("Create new entry")
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -34,16 +38,32 @@ public class AddClassDialog extends AppCompatDialogFragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
 
                     }
-                })
-                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
                 });
+        if (update) {
+            builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+        } else {
+            builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+        }
+
 
         classname = v1.findViewById(R.id.classname);
         subname = v1.findViewById(R.id.subname);
+
+        if (update) {
+            classname.setText(getArguments().getString("className"));
+            subname.setText(getArguments().getString("subName"));
+            classID = getArguments().getLong("classID");
+        }
 
         //dialog box is created with builder.create
         final AlertDialog dialog = builder.create();
@@ -60,7 +80,7 @@ public class AddClassDialog extends AppCompatDialogFragment {
                         String classnm = classname.getText().toString();
                         String subnm = subname.getText().toString();
                         if (!classnm.isEmpty() && !subnm.isEmpty()) {
-                            addc.createclass(classnm, subnm);
+                            addc.createclass(classID, classnm, subnm, update);
                             dialog.dismiss();
                         } else if (classnm.isEmpty()) {
                             classname.setError("Class name required!");
@@ -90,7 +110,7 @@ public class AddClassDialog extends AppCompatDialogFragment {
 
 
     public interface AddClass {
-        void createclass(String classname, String subname);
+        void createclass(long classId, String classname, String subname, boolean update);
     }
 
 

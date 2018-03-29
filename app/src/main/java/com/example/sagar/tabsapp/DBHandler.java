@@ -56,7 +56,7 @@ public class DBHandler extends SQLiteOpenHelper {
 
         String createattendancerecordquery = "CREATE TABLE " + TABLE_ATTENDANCE + "( " +
                 COLUMN_DATE + " DATE, " +
-                COLUMN_PRESENTY + " FLAG INTEGER DEFAULT 0, " +
+                COLUMN_PRESENTY + " FLAG ,INTEGER DEFAULT 0, " +
                 COLUMN_STUDID + " INTEGER, " +
                 COLUMN_CLASSID + " INTEGER, " +
                 "FOREIGN KEY (" + COLUMN_STUDID + ") REFERENCES " + TABLE_STUDENT + "(" + COLUMN_STUDID + "), " +
@@ -72,14 +72,21 @@ public class DBHandler extends SQLiteOpenHelper {
 
     }
 
-    public long addNewClassdb(String clsnm, String subnm) {
+    public long addNewClassdb(long classid, String clsnm, String subnm, boolean update) {
+        long id = 0;
         ContentValues values = new ContentValues();
         values.put(COLUMN_CLASSNAME, clsnm);
         values.put(COLUMN_SUBNAME, subnm);
         SQLiteDatabase db = getWritableDatabase();
-        long id = db.insert(TABLE_CLASS, null, values);
+        if (!update) {
+            id = db.insert(TABLE_CLASS, null, values);
+            db.close();
+            Log.d("New Class Added", "New Class Added Successfully");
+        } else {
+            db.update(TABLE_CLASS, values, COLUMN_CLASSID + " = " + classid, null);
+            Log.d("Class updated ", "updated successfully!");
+        }
         db.close();
-        Log.d("New Class Added", "New Class Added Successfully");
         return id;
 
     }
@@ -91,15 +98,23 @@ public class DBHandler extends SQLiteOpenHelper {
         db.execSQL("DELETE FROM " + TABLE_ATTENDANCE + " WHERE " + COLUMN_CLASSID + "=" + item.getid());
     }
 
-    public long addNewStudentdb(String studentname, int rollno, long classid) {
+    public long addNewStudentdb(long studid, String studentname, int rollno, long classid, boolean update) {
+        long id = 0;
         ContentValues values = new ContentValues();
-        values.put(COLUMN_CLASSID, classid);
         values.put(COLUMN_STUDNAME, studentname);
         values.put(COLUMN_ROLLNO, rollno);
         SQLiteDatabase db = getWritableDatabase();
-        long id = db.insert(TABLE_STUDENT, null, values);
+        if (!update) {
+            values.put(COLUMN_CLASSID, classid);
+            id = db.insert(TABLE_STUDENT, null, values);
+            Log.d("New Student Added", "New Student Added Successfully");
+            db.close();
+            return id;
+        } else {
+            db.update(TABLE_STUDENT, values, COLUMN_STUDID + " = " + studid, null);
+            Log.d("Student updated ", "updated successfully!");
+        }
         db.close();
-        Log.d("New Student Added", "New Student Added Successfully");
         return id;
     }
 

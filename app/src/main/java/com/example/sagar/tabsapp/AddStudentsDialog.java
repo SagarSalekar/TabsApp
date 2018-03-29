@@ -18,8 +18,11 @@ import android.widget.EditText;
 public class AddStudentsDialog extends DialogFragment {
     private EditText studname;
     private EditText rollno;
+    private boolean update;
+    private long studentID;
     private View v1;
     private AddStudentsDialog.AddStudent addc;
+
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -27,6 +30,8 @@ public class AddStudentsDialog extends DialogFragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         v1 = inflater.inflate(R.layout.add_students_dialog, null);
+        update = getArguments().getBoolean("update");
+
         builder.setView(v1)
                 .setTitle("Create new entry")
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -34,16 +39,32 @@ public class AddStudentsDialog extends DialogFragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
 
                     }
-                })
-                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
                 });
+        if (update) {
+            builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+        } else {
+            builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+        }
+
 
         studname = v1.findViewById(R.id.studentname);
         rollno = v1.findViewById(R.id.rollnumber);
+
+        if (update) {
+            studname.setText(getArguments().getString("studentName"));
+            rollno.setText(String.valueOf(getArguments().getInt("rollNo")));
+            studentID = getArguments().getLong("studentID");
+        }
 
         //dialog box is created with builder.create
         final AlertDialog dialog = builder.create();
@@ -60,7 +81,7 @@ public class AddStudentsDialog extends DialogFragment {
                         String studnm = studname.getText().toString();
                         int srollno = Integer.parseInt(rollno.getText().toString());
                         if (!studnm.isEmpty() && srollno != 0) {
-                            addc.createstudent(studnm, srollno);
+                            addc.createstudent(studentID, studnm, srollno, update);
                             dialog.dismiss();
                         } else if (studnm.isEmpty()) {
                             studname.setError("Student name required!");
@@ -90,7 +111,7 @@ public class AddStudentsDialog extends DialogFragment {
 
 
     public interface AddStudent {
-        void createstudent(String studentname, int rollno);
+        void createstudent(long studentid, String studentname, int rollno, boolean update);
     }
 
 

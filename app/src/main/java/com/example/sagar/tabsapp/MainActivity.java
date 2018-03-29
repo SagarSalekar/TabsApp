@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
@@ -14,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -69,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements AddClassDialog.Ad
         db = new DBHandler(MainActivity.this, null, null, 1);
 
     }
+
 
     public void takepermissions() {
 
@@ -136,11 +140,40 @@ public class MainActivity extends AppCompatActivity implements AddClassDialog.Ad
     }
 
     @Override
-    public void createclass(String classname, String subname) {
-        long id = db.addNewClassdb(classname, subname);
+    public void createclass(long classid, String classname, String subname, boolean update) {
+
+        if (!checkalreadyexist(classname, subname) && !update) {
+            long id = db.addNewClassdb(0, classname, subname, update);
+            Log.d("New Class", "New Class :" + String.valueOf(id));
+            tab1.addNewClass(classname, subname, id);
+        } else if (update) {
+            if (!checkalreadyexist(classname, subname)) {
+                db.addNewClassdb(classid, classname, subname, update);
+                mViewPager.getAdapter().notifyDataSetChanged();
+                Log.d("Update Class", "Update Class :" + String.valueOf(classid));
+            } else {
+                Toast.makeText(this, "Same Class already exist!", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Same Class already exist!", Toast.LENGTH_SHORT).show();
+        }
 
 
-        tab1.addNewClass(classname, subname, id);
+    }
+
+    public boolean checkalreadyexist(String classname, String subname) {
+        String query = "SELECT * FROM dbclasses WHERE dbclassname = '" + classname + "' AND dbsubname = '" + subname + "'";
+        SQLiteDatabase sqlitedb = db.getReadableDatabase();
+        Cursor cursor = sqlitedb.rawQuery(query, null);
+        Log.d("inside checkalready", "inside checkalready! before if");
+        if (cursor.moveToFirst()) {
+            Log.d("value", cursor.getString(cursor.getColumnIndex("dbclassname")));
+            cursor.close();
+            return true;
+        } else {
+            Log.d("inside checkalready", "inside else");
+            return false;
+        }
     }
 
     /**
@@ -151,6 +184,12 @@ public class MainActivity extends AppCompatActivity implements AddClassDialog.Ad
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            // POSITION_NONE makes it possible to reload the PagerAdapter
+            return POSITION_NONE;
         }
 
         @Override

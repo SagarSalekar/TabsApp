@@ -71,7 +71,7 @@ public class importStudentsActivity extends AppCompatActivity {
                     XSSFCell namecell = row.getCell(1);
                     String name = namecell.toString();
 
-                    db.addNewStudentdb(name, rollno, classid);
+                    db.addNewStudentdb(0, name, rollno, classid, false);
 
                 }
             }

@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,14 +39,28 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
         FloatingActionButton addstudbtn = findViewById(R.id.addstudentbutton);
         addstudbtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                openDialog();
+                openDialog(false, null);
             }
         });
     }
 
-    public void openDialog() {
+    //Open Add Student Dialog
+    public void openDialog(boolean update, StudentListItem clickedItem) {
         AddStudentsDialog d1 = new AddStudentsDialog();
-        d1.show(getFragmentManager(), "New Class");
+        // Supply args arguments input as an argument.
+        Bundle args = new Bundle();
+        args.putBoolean("update", update);
+        if (update) {
+            args.putString("studentName", clickedItem.getstudentsnm());
+            args.putInt("rollNo", clickedItem.getrollno());
+            args.putLong("studentID", clickedItem.getid());
+        }
+        d1.setArguments(args);
+        if (update) {
+            d1.show(getFragmentManager(), "Update Student");
+        } else {
+            d1.show(getFragmentManager(), "New Student");
+        }
     }
 
     @Override
@@ -75,11 +91,22 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
     }
 
 
+    //Implementing Interface to add or update new student;
     @Override
-    public void createstudent(String studentname, int rollno) {
-        if (!checkalreadyexist(rollno)) {
-            long id = db.addNewStudentdb(studentname, rollno, classid);
+    public void createstudent(long studid, String studentname, int rollno, boolean update) {
+        if (!checkalreadyexist(rollno) && !update) {
+            long id = db.addNewStudentdb(0, studentname, rollno, classid, update);
+            Log.d("New Student", "New Student :" + String.valueOf(id));
             addNewStudent(studentname, rollno, id);
+        } else if (update) {
+            if (!checkalreadyexist(rollno)) {
+                db.addNewStudentdb(studid, studentname, rollno, classid, update);
+                Log.d("Update Student", "Update Student :" + String.valueOf(studid));
+                displayStudentsData();
+            } else {
+                Toast.makeText(this, "Student with same roll no already exist!", Toast.LENGTH_SHORT).show();
+
+            }
         } else {
             Toast.makeText(this, "Student with same roll no already exist!", Toast.LENGTH_SHORT).show();
         }
@@ -126,7 +153,7 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 StudentListItem tempitem = item.get(i);
-                deletedialog(tempitem);
+                deleteoreditstudent(tempitem);
                 return true;
             }
         });
@@ -149,7 +176,9 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
                 .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        deleteoreditstudent(tempitem);
+                        db.deleteStudentdb(tempitem);
+                        displayStudentsData();
+                        Toast.makeText(AddStudentsActivity.this, "Student " + tempitem.getstudentsnm() + " deleted successfully!", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -161,10 +190,38 @@ public class AddStudentsActivity extends AppCompatActivity implements AddStudent
                 .show();
     }
 
-    public void deleteoreditstudent(StudentListItem clickedItem) {
-        db.deleteStudentdb(clickedItem);
-        displayStudentsData();
-        Toast.makeText(this, clickedItem.getstudentsnm() + " student deleted successfully! ", Toast.LENGTH_SHORT).show();
+    public void deleteoreditstudent(final StudentListItem clickedItem) {
+        LinearLayout askaction = new LinearLayout(this);
+        askaction.setOrientation(LinearLayout.VERTICAL);
+        TextView editaction = new TextView(this);
+        TextView deleteaction = new TextView(this);
+        editaction.setText("Edit");
+        editaction.setTextSize(20);
+        editaction.setPadding(20, 40, 20, 20);
+        deleteaction.setText("Delete");
+        deleteaction.setTextSize(20);
+        deleteaction.setPadding(20, 20, 20, 40);
+        askaction.addView(editaction);
+        askaction.addView(deleteaction);
+
+        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+        builder.setView(askaction);
+        final AlertDialog dialog = builder.show();
+
+        editaction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDialog(true, clickedItem);
+                dialog.dismiss();
+            }
+        });
+        deleteaction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deletedialog(clickedItem);
+                dialog.dismiss();
+            }
+        });
     }
 
     public boolean checkalreadyexist(int rollno) {

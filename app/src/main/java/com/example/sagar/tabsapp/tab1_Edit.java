@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,11 +27,13 @@ public class tab1_Edit extends Fragment {
 
     private View rootView;
     private ArrayList<ClassListItem> classitem = new ArrayList<ClassListItem>();
+    private DBHandler db;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.tab1_edit, container, false);
+        db = new DBHandler(getContext(), null, null, 1);
         displayClassData();
         dynamicView(rootView);
         return rootView;
@@ -40,14 +43,27 @@ public class tab1_Edit extends Fragment {
         FloatingActionButton createvbtn = rootView.findViewById(R.id.addview);
         createvbtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                openDialog();
+                openDialog(false, null);
             }
         });
     }
 
-    public void openDialog() {
+    public void openDialog(boolean update, ClassListItem clickedItem) {
         AddClassDialog d1 = new AddClassDialog();
-        d1.show(getFragmentManager(), "New Class");
+        Bundle args = new Bundle();
+        args.putBoolean("update", update);
+        if (update) {
+            args.putString("className", clickedItem.getclassnm());
+            args.putString("subName", clickedItem.getsubnm());
+            args.putLong("classID", clickedItem.getid());
+        }
+        d1.setArguments(args);
+        if (update) {
+            d1.show(getFragmentManager(), "Update Class");
+
+        } else {
+            d1.show(getFragmentManager(), "New Class");
+        }
     }
 
     public void addNewClass(String classname, String subname, long id) {
@@ -62,7 +78,6 @@ public class tab1_Edit extends Fragment {
         final ArrayList<ClassListItem> item = new ArrayList<ClassListItem>();
         String clsnm, subnm;
         long id;
-        DBHandler db = new DBHandler(getContext(), null, null, 1);
         String query = "SELECT * FROM dbclasses";
         SQLiteDatabase sqlitedb = db.getReadableDatabase();
         Cursor cursor = sqlitedb.rawQuery(query, null);
@@ -106,7 +121,7 @@ public class tab1_Edit extends Fragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 ClassListItem tempitem = item.get(i);
-                deletedialog(tempitem);
+                deleteoreditclass(tempitem);
                 return true;
             }
         });
@@ -116,11 +131,38 @@ public class tab1_Edit extends Fragment {
 
     }
 
-    public void deleteoreditclass(ClassListItem clickedItem) {
-        DBHandler db = new DBHandler(getContext(), null, null, 1);
-        db.deleteClassdb(clickedItem);
-        Toast.makeText(getContext(), clickedItem.getclassnm() + " class deleted successfully! ", Toast.LENGTH_SHORT).show();
-        displayClassData();
+    public void deleteoreditclass(final ClassListItem clickedItem) {
+        LinearLayout askaction = new LinearLayout(getContext());
+        askaction.setOrientation(LinearLayout.VERTICAL);
+        TextView editaction = new TextView(getContext());
+        TextView deleteaction = new TextView(getContext());
+        editaction.setText("Edit");
+        editaction.setTextSize(20);
+        editaction.setPadding(20, 40, 20, 20);
+        deleteaction.setText("Delete");
+        deleteaction.setTextSize(20);
+        deleteaction.setPadding(20, 20, 20, 40);
+        askaction.addView(editaction);
+        askaction.addView(deleteaction);
+
+        final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getContext());
+        builder.setView(askaction);
+        final AlertDialog dialog = builder.show();
+
+        editaction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDialog(true, clickedItem);
+                dialog.dismiss();
+            }
+        });
+        deleteaction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deletedialog(clickedItem);
+                dialog.dismiss();
+            }
+        });
     }
 
 
@@ -137,7 +179,8 @@ public class tab1_Edit extends Fragment {
                 .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        deleteoreditclass(tempitem);
+                        db.deleteClassdb(tempitem);
+                        displayClassData();
                     }
                 })
                 .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
